@@ -1,7 +1,6 @@
 // ❌ 서버에 이미지 관련 API 없음
 // import * as ImagePicker from 'expo-image-picker';
 
-import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   FlatList,
@@ -21,16 +20,49 @@ type Board = {
 
 export default function MainScreen() {
   // ⚠️ 서버는 member id 기준
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const memberId = Number(id);
+  const [memberId, setMemberId] = useState<number | null>(null);
 
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [boards, setBoards] = useState<Board[]>([]);
 
+  const getMember = async() => {
+    try {
+      let res = await fetch(
+        `http://localhost:3000/api/member/token`,
+        {
+          method: 'GET',
+          credentials: 'include'
+        }
+      );
+
+      if (res.status === 401) {
+        const refresh = await fetch(
+          `http://localhost:3000/api/auth/refresh`,
+          {
+            method: 'POST',
+            credentials: 'include',
+          }
+        );
+
+        if (refresh.ok) {
+          res = await fetch(
+            `http://localhost:3000/api/member/token`
+          )
+        }
+      }
+
+      const data = await res.json();
+
+      setMemberId(data.userId);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   /** 게시글 목록 조회 */
   const fetchBoards = async () => {
-    try {
+   try {
       const res = await fetch(
         `http://localhost:3000/api/board/view/${memberId}`,
       );
@@ -76,7 +108,10 @@ export default function MainScreen() {
   };
 
   useEffect(() => {
-    fetchBoards();
+    getMember();
+
+    if (memberId !== null)
+      fetchBoards();
   }, []);
 
   return (
