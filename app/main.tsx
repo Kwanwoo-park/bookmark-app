@@ -14,15 +14,16 @@ import {
 
 type Board = {
   id: number;
-  title: string;
+  description: string;
   url: string;
 };
 
 export default function MainScreen() {
   // ⚠️ 서버는 member id 기준
   const [memberId, setMemberId] = useState<number | null>(null);
+  const [memberName, setMemberName] = useState<string | null>(null);
 
-  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
   const [boards, setBoards] = useState<Board[]>([]);
 
@@ -54,7 +55,8 @@ export default function MainScreen() {
 
       const data = await res.json();
 
-      setMemberId(data.userId);
+      setMemberId(data.id);
+      setMemberName(data.name);
     } catch (err) {
       console.error(err);
     }
@@ -75,7 +77,7 @@ export default function MainScreen() {
 
   /** 게시글 생성 */
   const createBoard = async () => {
-    if (!title || !url) return;
+    if (!description || !url) return;
 
     try {
       const res = await fetch(
@@ -86,7 +88,7 @@ export default function MainScreen() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            title,
+            description,
             url,
           }),
         },
@@ -95,7 +97,7 @@ export default function MainScreen() {
       const saved = await res.json();
       setBoards((prev) => [saved, ...prev]);
 
-      setTitle('');
+      setDescription('');
       setUrl('');
     } catch (err) {
       console.error(err);
@@ -117,14 +119,14 @@ export default function MainScreen() {
   return (
     <View style={styles.container}>
       {/* 상단 사용자 정보 */}
-      <Text style={styles.user}>👤 Member #{memberId}</Text>
+      <Text style={styles.user}>👤 Member #{memberName}</Text>
 
       {/* 입력 영역 */}
       <View style={styles.form}>
         <TextInput
           placeholder="북마크 이름"
-          value={title}
-          onChangeText={setTitle}
+          value={description}
+          onChangeText={setDescription}
           style={styles.input}
         />
 
@@ -161,7 +163,7 @@ export default function MainScreen() {
             </View>
 
             <Text numberOfLines={1} style={styles.title}>
-              {item.title}
+              {item.description}
             </Text>
           </TouchableOpacity>
         )}
