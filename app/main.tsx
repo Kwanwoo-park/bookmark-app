@@ -100,8 +100,6 @@ export default function MainScreen() {
       );
 
       const saved = await res.json();
-      console.log(saved);
-
       setBoards((prev) => [saved, ...prev]);
 
       setDescription('');
