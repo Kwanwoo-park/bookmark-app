@@ -15,6 +15,7 @@ import {
 type Board = {
   id: number;
   description: string;
+  imgSrc: string;
   url: string;
 };
 
@@ -25,6 +26,7 @@ export default function MainScreen() {
 
   const [description, setDescription] = useState('');
   const [url, setUrl] = useState('');
+  const [imgSrc, setImgSrc] = useState('/img/1.jpg');
   const [boards, setBoards] = useState<Board[]>([]);
 
   const getMember = async() => {
@@ -79,6 +81,8 @@ export default function MainScreen() {
   const createBoard = async () => {
     if (!description || !url) return;
 
+    setImgSrc('/img/1.jpg');
+
     try {
       const res = await fetch(
         `http://localhost:3000/api/board/create/${memberId}`,
@@ -89,12 +93,15 @@ export default function MainScreen() {
           },
           body: JSON.stringify({
             description,
+            imgSrc,
             url,
           }),
         },
       );
 
       const saved = await res.json();
+      console.log(saved);
+
       setBoards((prev) => [saved, ...prev]);
 
       setDescription('');
